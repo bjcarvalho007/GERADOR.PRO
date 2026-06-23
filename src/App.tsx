@@ -410,7 +410,7 @@ export default function App() {
       </div>
 
       {/* Virtual Device Frame Wrapper */}
-      <div className="w-full min-h-screen md:min-h-0 md:h-[840px] md:max-h-[90vh] md:max-w-[400px] md:relative md:rounded-[50px] md:border-[10px] md:border-slate-800 md:bg-slate-900 md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.05),inset_0_0_3px_2px_rgba(255,255,255,0.1)] flex flex-col overflow-hidden relative transition-all duration-300">
+      <div className="w-full min-h-screen md:min-h-0 md:h-[840px] md:max-h-[90vh] md:max-w-[400px] md:relative md:rounded-[50px] md:border-[10px] md:border-slate-800 md:bg-slate-900 md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.05),inset_0_0_3px_2px_rgba(255,255,255,0.1)] flex flex-col md:overflow-hidden relative transition-all duration-300">
         
         {/* Dynamic Smartphone Notch/Hardware cutout (Desktop only) */}
         <div className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-36 h-6 bg-slate-800 rounded-b-2xl z-[100] border-x border-b border-slate-700/30">
@@ -419,7 +419,7 @@ export default function App() {
         </div>
 
         {/* FIXED SUB-FRAME WITH HEADING (Header & Status Bar don't scroll) */}
-        <div className="flex flex-col bg-slate-50 border-b border-slate-100 relative md:rounded-t-[36px] z-50">
+        <div className="sticky top-0 z-50 flex flex-col bg-slate-50 border-b border-slate-100 md:rounded-t-[36px]">
           {/* Simulated iOS status bar (Desktop only) */}
           <div className="hidden md:flex justify-between items-center px-6 pt-3 pb-2 text-[9px] font-black text-slate-600 bg-white select-none">
             <span>09:41</span>
@@ -467,7 +467,7 @@ export default function App() {
         </div>
 
         {/* Real App scroll container inside mock device */}
-        <div className="flex-grow flex flex-col bg-slate-50 overflow-y-auto scrollbar-none relative md:rounded-b-[36px] max-h-full pb-16 md:pb-6">
+        <div className="flex-grow flex flex-col bg-slate-50 md:overflow-y-auto scrollbar-none relative md:rounded-b-[36px] md:max-h-full pb-16 md:pb-6">
 
           {/* BOTÃO FLUTUANTE PREMIUM */}
           {!isPremium && (
