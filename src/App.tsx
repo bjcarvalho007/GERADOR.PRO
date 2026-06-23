@@ -245,8 +245,8 @@ export default function App() {
       return;
     }
 
-    // 2. Validate Free Usage Limit (Block after 3 if not Premium)
-    if (!isPremium && usageCounter >= 3) {
+    // 2. Validate Free Usage Limit (Block after 1 if not Premium)
+    if (!isPremium && usageCounter >= 1) {
       setIsBlockedByLimit(true);
       setIsPremiumModalOpen(true);
       return;
@@ -446,11 +446,11 @@ export default function App() {
                   </span>
                   {isPremium ? (
                     <span className="inline-flex items-center gap-1 text-[9px] bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-2.5 py-0.5 rounded-full font-black uppercase shadow-xs">
-                      PRO • {premiumDaysRemaining}d restantes
+                      PRO • FALTAM {premiumDaysRemaining} DIAS
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 text-[9px] bg-slate-400 text-white px-2 py-0.5 rounded-full font-black uppercase">
-                      FREE ({3 - Math.min(3, usageCounter)} grátis rest.)
+                      FREE ({1 - Math.min(1, usageCounter)} grátis rest.)
                     </span>
                   )}
                 </div>
