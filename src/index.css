@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer utilities {
+  .hero-gradient {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+  }
+
+  .glass-form {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Safe Area paddings */
+  .safe-pb {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-pt {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+input, select, textarea {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+}
+
+@keyframes pulse-premium {
+  0% { transform: scale(1); box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 15px 35px rgba(245, 158, 11, 0.6); }
+  100% { transform: scale(1); box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4); }
+}
+
+.btn-floating-premium {
+  animation: pulse-premium 2s infinite;
+}
