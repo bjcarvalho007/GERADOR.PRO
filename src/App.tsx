@@ -418,11 +418,10 @@ export default function App() {
           <div className="absolute top-1 right-8 w-1.5 h-1.5 bg-slate-950 rounded-full border border-slate-800/40" />
         </div>
 
-        {/* Real App scroll container inside mock device */}
-        <div className="flex-grow flex flex-col bg-slate-50 overflow-y-auto scrollbar-none relative md:rounded-[36px] max-h-full pb-16 md:pb-6">
-          
+        {/* FIXED SUB-FRAME WITH HEADING (Header & Status Bar don't scroll) */}
+        <div className="flex flex-col bg-slate-50 border-b border-slate-100 relative md:rounded-t-[36px] z-50">
           {/* Simulated iOS status bar (Desktop only) */}
-          <div className="hidden md:flex justify-between items-center px-6 pt-3 pb-2 text-[9px] font-black text-slate-600 bg-white/50 backdrop-blur-md select-none sticky top-0 z-50">
+          <div className="hidden md:flex justify-between items-center px-6 pt-3 pb-2 text-[9px] font-black text-slate-600 bg-white select-none">
             <span>09:41</span>
             <div className="flex items-center gap-1.5 font-sans">
               <span className="text-[8px]">5G</span>
@@ -431,6 +430,44 @@ export default function App() {
               </div>
             </div>
           </div>
+
+          {/* HEADER NAVIGATION */}
+          <nav className="bg-white px-4 py-3 safe-pt shadow-xs">
+            <div className="max-w-md mx-auto flex justify-between items-center">
+              <div className="flex items-center gap-2.5 font-sans">
+                <div className="w-9 h-9 hero-gradient rounded-xl flex items-center justify-center shadow-md">
+                  <Snowflake className="text-white w-5 h-5 animate-spin-slow" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-black tracking-wider text-slate-400 uppercase block leading-none mb-1">
+                    GERADORPRO
+                  </span>
+                  {isPremium ? (
+                    <span className="inline-flex items-center gap-1 text-[9px] bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-2.5 py-0.5 rounded-full font-black uppercase shadow-xs">
+                      PRO • {premiumDaysRemaining}d restantes
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[9px] bg-slate-400 text-white px-2 py-0.5 rounded-full font-black uppercase">
+                      FREE ({3 - Math.min(3, usageCounter)} grátis rest.)
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setIsHistoryOpen(true)}
+                className="p-2 border border-slate-100 hover:border-sky-100 hover:bg-sky-50/50 rounded-2xl text-slate-500 hover:text-sky-600 transition-all flex items-center gap-1.5 active:scale-90 font-sans"
+              >
+                <span className="text-[10px] font-bold uppercase block tracking-wider text-slate-500">
+                  Histórico
+                </span>
+                <History className="w-4 h-4" />
+              </button>
+            </div>
+          </nav>
+        </div>
+
+        {/* Real App scroll container inside mock device */}
+        <div className="flex-grow flex flex-col bg-slate-50 overflow-y-auto scrollbar-none relative md:rounded-b-[36px] max-h-full pb-16 md:pb-6">
 
           {/* BOTÃO FLUTUANTE PREMIUM */}
           {!isPremium && (
@@ -446,40 +483,6 @@ export default function App() {
               <span>Seja Premium</span>
             </button>
           )}
-
-          {/* HEADER NAVIGATION */}
-          <nav className="bg-white/90 backdrop-blur-md sticky top-0 md:top-0 z-40 border-b border-slate-100 px-4 py-3 safe-pt shadow-xs">
-        <div className="max-w-md mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 hero-gradient rounded-xl flex items-center justify-center shadow-md">
-              <Snowflake className="text-white w-5 h-5 animate-spin-slow" />
-            </div>
-            <div>
-              <span className="text-[10px] font-black tracking-wider text-slate-400 uppercase block line-height-none">
-                GERADORPRO
-              </span>
-              {isPremium ? (
-                <span className="inline-flex items-center gap-1 text-[9px] bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-2.5 py-0.5 rounded-full font-black uppercase shadow-xs">
-                  PRO • {premiumDaysRemaining}d restantes
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 text-[9px] bg-slate-400 text-white px-2 py-0.5 rounded-full font-black uppercase">
-                  FREE ({3 - Math.min(3, usageCounter)} grátis rest.)
-                </span>
-              )}
-            </div>
-          </div>
-          <button
-            onClick={() => setIsHistoryOpen(true)}
-            className="p-2 border border-slate-100 hover:border-sky-100 hover:bg-sky-50/50 rounded-2xl text-slate-500 hover:text-sky-600 transition-all flex items-center gap-1.5 active:scale-90"
-          >
-            <span className="text-[10px] font-bold uppercase block tracking-wider text-slate-500">
-              Histórico
-            </span>
-            <History className="w-4 h-4" />
-          </button>
-        </div>
-      </nav>
 
       {/* TOP HERO COVER */}
       <div className="hero-gradient w-full pt-8 pb-20 px-6 text-white text-center relative overflow-hidden">
