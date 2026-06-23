@@ -119,7 +119,7 @@ export const PremiumModal: FC<PremiumModalProps> = ({
             rel="noopener noreferrer"
             className="block w-full py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-amber-100 active:scale-95 transition-all text-center"
           >
-            1. PAGAR NO MERCADOLIVRE
+            1. EFETUAR PAGAMENTO / ASSINAR PREMIUM
           </a>
 
           <div className="pt-3 border-t border-slate-100">

@@ -334,7 +334,7 @@ export const QuotePDF: FC<QuotePDFProps> = ({
       >
         {isPremium
           ? `GERADO POR: ${businessName.toUpperCase() || "GERADORPRO PREMIUM"}`
-          : "GERADO POR GERADORPRO FREE • ADQUIRA A VERSÃO PREMIUM NA GOOGLE AI STUDIO APP"}
+          : "GERADO POR GERADORPRO FREE • ADQUIRA A VERSÃO PREMIUM"}
       </div>
     </div>
   );
