@@ -410,7 +410,7 @@ export default function App() {
       </div>
 
       {/* Virtual Device Frame Wrapper */}
-      <div className="w-full min-h-screen md:min-h-0 md:h-[840px] md:max-w-[400px] md:relative md:rounded-[50px] md:border-[10px] md:border-slate-800 md:bg-slate-900 md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.05),inset_0_0_3px_2px_rgba(255,255,255,0.1)] flex flex-col overflow-hidden relative transition-all duration-300">
+      <div className="w-full min-h-screen md:min-h-0 md:h-[840px] md:max-h-[90vh] md:max-w-[400px] md:relative md:rounded-[50px] md:border-[10px] md:border-slate-800 md:bg-slate-900 md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.05),inset_0_0_3px_2px_rgba(255,255,255,0.1)] flex flex-col overflow-hidden relative transition-all duration-300">
         
         {/* Dynamic Smartphone Notch/Hardware cutout (Desktop only) */}
         <div className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-36 h-6 bg-slate-800 rounded-b-2xl z-[100] border-x border-b border-slate-700/30">
