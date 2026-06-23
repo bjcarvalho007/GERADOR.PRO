@@ -363,79 +363,16 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 md:bg-slate-950 flex items-center justify-center font-sans antialiased text-slate-900 transition-colors duration-500 overflow-x-hidden relative">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans antialiased text-slate-900 relative">
       
-      {/* Background radial visual lights */}
-      <div className="hidden md:block absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(56,189,248,0.06),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(245,158,11,0.04),transparent_50%)] pointer-events-none" />
-      
-      {/* Decorative desktop branding panel (Left hand side) */}
-      <div className="hidden lg:flex flex-col justify-center max-w-sm mr-16 text-white space-y-6 z-10 pl-6 select-none animate-fade-in">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 rounded-2xl flex items-center justify-center shadow-[0_8px_20px_rgba(14,165,233,0.3)] border border-sky-300/20">
-            <Snowflake className="text-white w-7 h-7" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-black uppercase tracking-tight text-white m-0 leading-none">
-              GERADOR<span className="text-sky-400">PRO</span>
-            </h2>
-            <p className="text-[9px] font-bold text-sky-400/80 uppercase tracking-widest mt-1">
-              SISTEMAS DE AR-CONDICIONADO
-            </p>
-          </div>
-        </div>
-        
-        <div className="space-y-4">
-          <div className="bg-white/[0.04] backdrop-blur-md border border-white/10 rounded-[1.8rem] p-5 space-y-3">
-            <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-              <Crown className="w-4 h-4 text-amber-400" /> VERSÃO PRO MOBILE WEB
-            </span>
-            <p className="text-[11px] text-slate-300 leading-relaxed font-semibold">
-              Desfrute de uma experiência de aplicativo de alto nível diretamente na web. Projetado com carinho e precisão para uma visualização rápida e geração ágil de PDF de alta fidelidade para seus clientes.
-            </p>
-          </div>
+      {/* Container principal sem bordas de telefone, adaptado para todo o site */}
+      <div className="w-full flex-grow flex flex-col relative">
 
-          <div className="grid grid-cols-2 gap-2.5">
-            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 text-center">
-              <span className="block text-sky-400 text-lg font-black font-sans leading-none">100%</span>
-              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Aprovado por Técnicos</span>
-            </div>
-            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 text-center">
-              <span className="block text-emerald-400 text-lg font-black font-sans leading-none">Protegido</span>
-              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Criptografia Local</span>
-            </div>
-          </div>
-        </div>
-
-        <p className="text-[9px] text-slate-500 font-extrabold uppercase leading-relaxed tracking-wider">
-          💡 Dica: No computador, você visualiza a interface exatamente no formato e usabilidade de tela que seu cliente receberá no WhatsApp!
-        </p>
-      </div>
-
-      {/* Virtual Device Frame Wrapper */}
-      <div className="w-full min-h-screen md:min-h-0 md:h-[840px] md:max-h-[90vh] md:max-w-[400px] md:relative md:rounded-[50px] md:border-[10px] md:border-slate-800 md:bg-slate-900 md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.05),inset_0_0_3px_2px_rgba(255,255,255,0.1)] flex flex-col md:overflow-hidden relative transition-all duration-300">
-        
-        {/* Dynamic Smartphone Notch/Hardware cutout (Desktop only) */}
-        <div className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-36 h-6 bg-slate-800 rounded-b-2xl z-[100] border-x border-b border-slate-700/30">
-          <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-14 h-1 bg-slate-950 rounded-full" />
-          <div className="absolute top-1 right-8 w-1.5 h-1.5 bg-slate-950 rounded-full border border-slate-800/40" />
-        </div>
-
-        {/* FIXED SUB-FRAME WITH HEADING (Header & Status Bar don't scroll) */}
-        <div className="sticky top-0 z-50 flex flex-col bg-slate-50 border-b border-slate-100 md:rounded-t-[36px]">
-          {/* Simulated iOS status bar (Desktop only) */}
-          <div className="hidden md:flex justify-between items-center px-6 pt-3 pb-2 text-[9px] font-black text-slate-600 bg-white select-none">
-            <span>09:41</span>
-            <div className="flex items-center gap-1.5 font-sans">
-              <span className="text-[8px]">5G</span>
-              <div className="w-4 h-2 border border-slate-500 rounded-xs p-0.2 flex items-center">
-                <div className="h-full w-full bg-slate-500 rounded-3xs" />
-              </div>
-            </div>
-          </div>
-
+        {/* FIXED CABEÇALHO (Sticky no topo, largo e profissional) */}
+        <div className="sticky top-0 z-50 flex flex-col bg-white border-b border-slate-100 shadow-xs">
           {/* HEADER NAVIGATION */}
-          <nav className="bg-white px-4 py-3 safe-pt shadow-xs">
-            <div className="max-w-md mx-auto flex justify-between items-center">
+          <nav className="px-4 py-3.5 safe-pt">
+            <div className="max-w-md md:max-w-4xl mx-auto flex justify-between items-center">
               <div className="flex items-center gap-2.5 font-sans">
                 <div className="w-9 h-9 hero-gradient rounded-xl flex items-center justify-center shadow-md">
                   <Snowflake className="text-white w-5 h-5 animate-spin-slow" />
@@ -468,8 +405,8 @@ export default function App() {
           </nav>
         </div>
 
-        {/* Real App scroll container inside mock device */}
-        <div className="flex-grow flex flex-col bg-slate-50 md:overflow-y-auto scrollbar-none relative md:rounded-b-[36px] md:max-h-full pb-16 md:pb-6">
+        {/* Conteúdo do aplicativo com rolagem nativa e fluida no corpo do site */}
+        <div className="flex-grow flex flex-col bg-slate-50 relative pb-16 md:pb-6">
 
           {/* BOTÃO FLUTUANTE PREMIUM */}
           {!isPremium && (
@@ -479,7 +416,7 @@ export default function App() {
                 setIsBlockedByLimit(false);
                 setIsPremiumModalOpen(true);
               }}
-              className="fixed md:absolute bottom-[30px] right-[20px] z-[45] bg-gradient-to-br from-amber-500 to-yellow-500 text-white px-5 py-3 rounded-full shadow-[0_10px_25px_rgba(245,158,11,0.4)] flex items-center gap-2 font-extrabold text-[11px] uppercase tracking-wider border-2 border-white/30 transition-all hover:scale-105 active:scale-95 btn-floating-premium outline-none cursor-pointer"
+              className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[45] bg-gradient-to-br from-amber-500 to-yellow-500 text-white px-5 py-3 rounded-full shadow-[0_10px_25px_rgba(245,158,11,0.4)] flex items-center gap-2 font-extrabold text-[11px] uppercase tracking-wider border-2 border-white/30 transition-all hover:scale-105 active:scale-95 btn-floating-premium outline-none cursor-pointer"
             >
               <Crown className="w-4 h-4 text-white" />
               <span>Seja Premium</span>
@@ -488,7 +425,7 @@ export default function App() {
 
       {/* TOP HERO COVER */}
       <div className="hero-gradient w-full pt-8 pb-20 px-6 text-white text-center relative overflow-hidden">
-        <div className="max-w-md mx-auto relative z-10 space-y-1">
+        <div className="max-w-md md:max-w-4xl mx-auto relative z-10 space-y-1">
           <h1 className="text-2xl font-black tracking-tight leading-none uppercase">
             GERADOR DE <span className="text-sky-200">ORÇAMENTO</span>
           </h1>
@@ -501,7 +438,7 @@ export default function App() {
       </div>
 
       {/* MAIN LAYOUT */}
-      <main className="max-w-md mx-auto w-full px-4 -mt-12 relative z-20 flex-grow">
+      <main className="max-w-md md:max-w-4xl mx-auto w-full px-4 -mt-12 relative z-20 flex-grow">
         <div className="glass-form rounded-[2.5rem] p-6 shadow-xl border border-white">
           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             
@@ -759,7 +696,7 @@ export default function App() {
       </main>
 
       {/* FOOTER CONTROLS */}
-      <footer className="max-w-md mx-auto w-full py-10 text-center space-y-4 safe-pb px-4">
+      <footer className="max-w-md md:max-w-4xl mx-auto w-full py-10 text-center space-y-4 safe-pb px-4">
         <div className="space-y-1">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
             Todos os direitos reservados • GERADORPRO
