@@ -18,6 +18,8 @@ import { Toast } from "./components/Toast";
 import { PremiumModal } from "./components/PremiumModal";
 import { HistoryDrawer } from "./components/HistoryDrawer";
 import { QuotePDF } from "./components/QuotePDF";
+// @ts-ignore
+import html2pdf from "html2pdf.js";
 import {
   Quote,
   QuoteItem,
@@ -272,7 +274,7 @@ export default function App() {
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
         };
         // Trigger download directly inside browser using HTML2PDF object
-        const html2pdfLib = (window as any).html2pdf;
+        const html2pdfLib = html2pdf || (window as any).html2pdf;
         if (html2pdfLib) {
           await html2pdfLib().set(opt).from(element).save();
         } else {
