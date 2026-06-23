@@ -46,6 +46,8 @@ export default function App() {
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [clientPhoneAlt, setClientPhoneAlt] = useState("");
+  const [clientDoc, setClientDoc] = useState("");
+  const [clientAddress, setClientAddress] = useState("");
 
   // --- Quote Items ---
   const [items, setItems] = useState<QuoteItem[]>([]);
@@ -288,6 +290,8 @@ export default function App() {
       cliente: clientName,
       telefone: clientPhone,
       contatoAlt: clientPhoneAlt,
+      clientDoc: clientDoc,
+      clientAddress: clientAddress,
       data: currentDateStr,
       items: [...items],
       total: formattedTotal
@@ -322,6 +326,8 @@ export default function App() {
     setClientName("");
     setClientPhone("");
     setClientPhoneAlt("");
+    setClientDoc("");
+    setClientAddress("");
     setItems([]);
   };
 
@@ -347,30 +353,102 @@ export default function App() {
     setClientName(quote.cliente);
     setClientPhone(quote.telefone);
     setClientPhoneAlt(quote.contatoAlt || "");
+    setClientDoc(quote.clientDoc || "");
+    setClientAddress(quote.clientAddress || "");
     setItems(quote.items);
     setIsHistoryOpen(false);
     triggerToast("Orçamento carregado na tela de edição!", "success");
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 relative antialiased text-slate-900 pb-16 font-sans">
-      {/* BOTÃO FLUTUANTE PREMIUM */}
-      {!isPremium && (
-        <button
-          id="floatingPremiumBtn"
-          onClick={() => {
-            setIsBlockedByLimit(false);
-            setIsPremiumModalOpen(true);
-          }}
-          className="btn-floating-premium hover:scale-105 active:scale-95 transition-all outline-none"
-        >
-          <Crown className="w-4 h-4 text-white" />
-          <span>Seja Premium</span>
-        </button>
-      )}
+    <div className="min-h-screen bg-slate-900 md:bg-slate-950 flex items-center justify-center font-sans antialiased text-slate-900 transition-colors duration-500 overflow-x-hidden relative">
+      
+      {/* Background radial visual lights */}
+      <div className="hidden md:block absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(56,189,248,0.06),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(245,158,11,0.04),transparent_50%)] pointer-events-none" />
+      
+      {/* Decorative desktop branding panel (Left hand side) */}
+      <div className="hidden lg:flex flex-col justify-center max-w-sm mr-16 text-white space-y-6 z-10 pl-6 select-none animate-fade-in">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-gradient-to-br from-sky-400 to-sky-600 rounded-2xl flex items-center justify-center shadow-[0_8px_20px_rgba(14,165,233,0.3)] border border-sky-300/20">
+            <Snowflake className="text-white w-7 h-7" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black uppercase tracking-tight text-white m-0 leading-none">
+              GERADOR<span className="text-sky-400">PRO</span>
+            </h2>
+            <p className="text-[9px] font-bold text-sky-400/80 uppercase tracking-widest mt-1">
+              SISTEMAS DE AR-CONDICIONADO
+            </p>
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="bg-white/[0.04] backdrop-blur-md border border-white/10 rounded-[1.8rem] p-5 space-y-3">
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+              <Crown className="w-4 h-4 text-amber-400" /> VERSÃO PRO MOBILE WEB
+            </span>
+            <p className="text-[11px] text-slate-300 leading-relaxed font-semibold">
+              Desfrute de uma experiência de aplicativo de alto nível diretamente na web. Projetado com carinho e precisão para uma visualização rápida e geração ágil de PDF de alta fidelidade para seus clientes.
+            </p>
+          </div>
 
-      {/* HEADER NAVIGATION */}
-      <nav className="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 px-4 py-3 safe-pt shadow-xs">
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 text-center">
+              <span className="block text-sky-400 text-lg font-black font-sans leading-none">100%</span>
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Aprovado por Técnicos</span>
+            </div>
+            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 text-center">
+              <span className="block text-emerald-400 text-lg font-black font-sans leading-none">Protegido</span>
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Criptografia Local</span>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-[9px] text-slate-500 font-extrabold uppercase leading-relaxed tracking-wider">
+          💡 Dica: No computador, você visualiza a interface exatamente no formato e usabilidade de tela que seu cliente receberá no WhatsApp!
+        </p>
+      </div>
+
+      {/* Virtual Device Frame Wrapper */}
+      <div className="w-full min-h-screen md:min-h-0 md:h-[840px] md:max-w-[400px] md:relative md:rounded-[50px] md:border-[10px] md:border-slate-800 md:bg-slate-900 md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.05),inset_0_0_3px_2px_rgba(255,255,255,0.1)] flex flex-col overflow-hidden relative transition-all duration-300">
+        
+        {/* Dynamic Smartphone Notch/Hardware cutout (Desktop only) */}
+        <div className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-36 h-6 bg-slate-800 rounded-b-2xl z-[100] border-x border-b border-slate-700/30">
+          <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-14 h-1 bg-slate-950 rounded-full" />
+          <div className="absolute top-1 right-8 w-1.5 h-1.5 bg-slate-950 rounded-full border border-slate-800/40" />
+        </div>
+
+        {/* Real App scroll container inside mock device */}
+        <div className="flex-grow flex flex-col bg-slate-50 overflow-y-auto scrollbar-none relative md:rounded-[36px] max-h-full pb-16 md:pb-6">
+          
+          {/* Simulated iOS status bar (Desktop only) */}
+          <div className="hidden md:flex justify-between items-center px-6 pt-3 pb-2 text-[9px] font-black text-slate-600 bg-white/50 backdrop-blur-md select-none sticky top-0 z-50">
+            <span>09:41</span>
+            <div className="flex items-center gap-1.5 font-sans">
+              <span className="text-[8px]">5G</span>
+              <div className="w-4 h-2 border border-slate-500 rounded-xs p-0.2 flex items-center">
+                <div className="h-full w-full bg-slate-500 rounded-3xs" />
+              </div>
+            </div>
+          </div>
+
+          {/* BOTÃO FLUTUANTE PREMIUM */}
+          {!isPremium && (
+            <button
+              id="floatingPremiumBtn"
+              onClick={() => {
+                setIsBlockedByLimit(false);
+                setIsPremiumModalOpen(true);
+              }}
+              className="fixed md:absolute bottom-[30px] right-[20px] z-[45] bg-gradient-to-br from-amber-500 to-yellow-500 text-white px-5 py-3 rounded-full shadow-[0_10px_25px_rgba(245,158,11,0.4)] flex items-center gap-2 font-extrabold text-[11px] uppercase tracking-wider border-2 border-white/30 transition-all hover:scale-105 active:scale-95 btn-floating-premium outline-none cursor-pointer"
+            >
+              <Crown className="w-4 h-4 text-white" />
+              <span>Seja Premium</span>
+            </button>
+          )}
+
+          {/* HEADER NAVIGATION */}
+          <nav className="bg-white/90 backdrop-blur-md sticky top-0 md:top-0 z-40 border-b border-slate-100 px-4 py-3 safe-pt shadow-xs">
         <div className="max-w-md mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 hero-gradient rounded-xl flex items-center justify-center shadow-md">
@@ -468,7 +546,7 @@ export default function App() {
                 <input
                   type="text"
                   required
-                  placeholder="Nome Completo do Cliente"
+                  placeholder="Nome Completo / Razão Social"
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
                   className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-semibold text-center placeholder-slate-400 focus:border-sky-400 focus:outline-none transition-all duration-200 shadow-xs"
@@ -477,16 +555,32 @@ export default function App() {
                   <input
                     type="tel"
                     required
-                    placeholder="WhatsApp Cliente"
+                    placeholder="WhatsApp do Cliente"
                     value={clientPhone}
                     onChange={(e) => setClientPhone(e.target.value)}
                     className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-center placeholder-slate-400 focus:border-sky-400 focus:outline-none transition-all duration-200 shadow-xs"
                   />
                   <input
                     type="text"
+                    placeholder="CPF / CNPJ do Cliente"
+                    value={clientDoc}
+                    onChange={(e) => setClientDoc(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-center placeholder-slate-400 focus:border-sky-400 focus:outline-none transition-all duration-200 shadow-xs"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
                     placeholder="Contato Alt. (Opcional)"
                     value={clientPhoneAlt}
                     onChange={(e) => setClientPhoneAlt(e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-center placeholder-slate-400 focus:border-sky-400 focus:outline-none transition-all duration-200 opacity-85 shadow-xs"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Local / Cidade / UF"
+                    value={clientAddress}
+                    onChange={(e) => setClientAddress(e.target.value)}
                     className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-center placeholder-slate-400 focus:border-sky-400 focus:outline-none transition-all duration-200 opacity-85 shadow-xs"
                   />
                 </div>
@@ -682,6 +776,9 @@ export default function App() {
         </a>
       </footer>
 
+        </div> {/* Real App scroll container inside mock device */}
+      </div> {/* Virtual Device Frame Wrapper */}
+
       {/* --- HIDDEN PDF WRAPPER ENGINE FOR EXPORT (REMAINED IN ACCURATE DIMENSIONS) --- */}
       <div className="absolute left-[-9999px] top-[-9999px] overflow-hidden">
         <QuotePDF
@@ -689,6 +786,9 @@ export default function App() {
           businessCnpj={profInfo.cnpj}
           clientName={clientName}
           clientPhone={clientPhone}
+          clientPhoneAlt={clientPhoneAlt}
+          clientDoc={clientDoc}
+          clientAddress={clientAddress}
           items={items}
           total={getFormattedTotal()}
           isPremium={isPremium}
@@ -734,6 +834,9 @@ export default function App() {
                   businessCnpj={profInfo.cnpj}
                   clientName={clientName}
                   clientPhone={clientPhone}
+                  clientPhoneAlt={clientPhoneAlt}
+                  clientDoc={clientDoc}
+                  clientAddress={clientAddress}
                   items={items}
                   total={getFormattedTotal()}
                   isPremium={isPremium}

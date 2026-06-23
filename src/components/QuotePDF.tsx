@@ -6,6 +6,9 @@ interface QuotePDFProps {
   businessCnpj: string;
   clientName: string;
   clientPhone: string;
+  clientPhoneAlt?: string;
+  clientDoc?: string;
+  clientAddress?: string;
   items: QuoteItem[];
   total: string;
   isPremium: boolean;
@@ -16,6 +19,9 @@ export const QuotePDF: FC<QuotePDFProps> = ({
   businessCnpj,
   clientName,
   clientPhone,
+  clientPhoneAlt,
+  clientDoc,
+  clientAddress,
   items,
   total,
   isPremium,
@@ -134,10 +140,28 @@ export const QuotePDF: FC<QuotePDFProps> = ({
                 {clientName || "NÃO INFORMADO"}
               </td>
             </tr>
+            {clientDoc && (
+              <tr>
+                <td style={{ padding: "4px 0", fontWeight: "bold" }}>CPF/CNPJ:</td>
+                <td style={{ color: "#0f172a", fontWeight: 600 }}>
+                  {clientDoc}
+                </td>
+              </tr>
+            )}
             <tr>
               <td style={{ padding: "4px 0", fontWeight: "bold" }}>CONTATO:</td>
-              <td style={{ color: "#0f172a", fontWeight: 600 }}>{clientPhone}</td>
+              <td style={{ color: "#0f172a", fontWeight: 600 }}>
+                {clientPhone} {clientPhoneAlt ? ` / ${clientPhoneAlt}` : ""}
+              </td>
             </tr>
+            {clientAddress && (
+              <tr>
+                <td style={{ padding: "4px 0", fontWeight: "bold" }}>ENDEREÇO:</td>
+                <td style={{ color: "#0f172a", fontWeight: 600, textTransform: "uppercase" }}>
+                  {clientAddress}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

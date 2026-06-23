@@ -1,5 +1,5 @@
 import { type FC, useState } from "react";
-import { Crown, CheckCircle2, X } from "lucide-react";
+import { Crown, CheckCircle2, X, ShieldCheck, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 interface PremiumModalProps {
@@ -60,6 +60,11 @@ export const PremiumModal: FC<PremiumModalProps> = ({
           <X className="w-5 h-5" />
         </button>
 
+        <div className="flex items-center justify-center gap-1.5 mx-auto bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-wider w-fit mb-1">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+          <span>Conexão & Pagamento Seguro</span>
+        </div>
+
         <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto">
           <Crown className="text-amber-500 w-9 h-9 animate-pulse" />
         </div>
@@ -88,7 +93,7 @@ export const PremiumModal: FC<PremiumModalProps> = ({
           </div>
           <div className="pt-2 border-t border-slate-200">
             <div className="flex justify-between items-baseline font-mono">
-              <span className="text-2xl font-black text-slate-800">R$ 10,99</span>
+              <span className="text-2xl font-black text-slate-800 font-sans">R$ 10,99</span>
               <span className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">
                 Mensal (30 Dias)
               </span>
@@ -97,14 +102,14 @@ export const PremiumModal: FC<PremiumModalProps> = ({
         </div>
 
         <div className="space-y-3">
-          <div className="bg-amber-50 border border-amber-200/50 rounded-2xl p-3 text-left">
-            <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wide mb-1 opacity-90">
-              Passo a Passo de Ativação:
+          <div className="bg-slate-50 border border-slate-100/50 rounded-2xl p-4 text-left">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-wide mb-2 opacity-95">
+              Como ativar sua conta PRO com segurança:
             </p>
-            <ul className="text-[9px] text-slate-600 font-semibold list-decimal list-inside space-y-1">
-              <li>Pague via MercadoLivre usando o botão abaixo.</li>
-              <li>Sua chave do aparelho é: <strong className="font-mono text-amber-700">{deviceId}</strong>.</li>
-              <li>Use o código de ativação fornecido, ou envie o comprovante ao suporte para receber sua chave instantaneamente.</li>
+            <ul className="text-[9px] text-slate-500 font-bold list-decimal list-inside space-y-1.5 leading-relaxed">
+              <li>Pague via MercadoLivre usando o botão de pagamento.</li>
+              <li>Toque para enviar o comprovante e seu ID para o suporte.</li>
+              <li>Insira o código de 30 dias que o suporte irá te enviar abaixo.</li>
             </ul>
           </div>
 
@@ -118,13 +123,10 @@ export const PremiumModal: FC<PremiumModalProps> = ({
           </a>
 
           <div className="pt-3 border-t border-slate-100">
-            <p className="text-[9px] font-bold text-slate-400 uppercase mb-2">
-              Seu ID: <span className="font-mono text-slate-700">{deviceId}</span>
-            </p>
             <div className="flex gap-2">
               <input
                 type="text"
-                placeholder="DIGITE SEU CÓDIGO"
+                placeholder="DIGITE O CÓDIGO RECEBIDO"
                 value={activationCode}
                 onChange={(e) => setActivationCode(e.target.value)}
                 className="flex-grow px-3 py-2 rounded-xl border border-slate-200 text-center text-xs font-black uppercase bg-slate-50 focus:border-amber-500 focus:outline-none"
@@ -140,10 +142,20 @@ export const PremiumModal: FC<PremiumModalProps> = ({
           
           <button
             onClick={handleBuyRedirect}
-            className="text-[9px] font-extrabold text-[#128C7E] uppercase block mx-auto underline mt-1"
+            className="w-full py-3 bg-[#25D366] hover:bg-[#25D366]/90 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all outline-none"
           >
-            Enviar Comprovante por WhatsApp
+            <span>2. ENVIAR ID E COMPROVANTE</span>
           </button>
+
+          <div className="pt-3 border-t border-slate-100 flex flex-col items-center justify-center gap-1">
+            <div className="flex items-center gap-1 text-[8px] text-emerald-600 font-extrabold uppercase tracking-widest">
+              <Lock className="w-3.5 h-3.5" /> 
+              <span>Transação Criptografada SSL</span>
+            </div>
+            <p className="text-[7.5px] text-slate-400 font-semibold leading-relaxed max-w-[260px] mx-auto uppercase">
+              Garantia LGPD: Seus dados estão salvos apenas no seu aparelho de forma confidencial. Transações garantidas pela proteção oficial do Mercado Pago.
+            </p>
+          </div>
         </div>
       </motion.div>
     </div>

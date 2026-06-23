@@ -11,6 +11,8 @@ export interface Quote {
   cliente: string;
   telefone: string;
   contatoAlt?: string;
+  clientDoc?: string;
+  clientAddress?: string;
   data: string;
   items: QuoteItem[];
   total: string;
