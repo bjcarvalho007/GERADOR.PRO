@@ -1,6 +1,7 @@
 import { type FC } from "react";
-import { X, Trash2, Calendar, Phone, DollarSign } from "lucide-react";
+import { X, Trash2, Calendar, Phone, DollarSign, Folder } from "lucide-react";
 import { Quote } from "../types";
+import { CATEGORIES } from "../data/categories";
 
 interface HistoryDrawerProps {
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface HistoryDrawerProps {
   quotes: Quote[];
   onDeleteQuote: (id: number) => void;
   onSelectQuote: (quote: Quote) => void;
+  onStatusChange?: (id: number, status: "aprovado" | "pendente" | "cancelado") => void;
 }
 
 export const HistoryDrawer: FC<HistoryDrawerProps> = ({
@@ -16,6 +18,7 @@ export const HistoryDrawer: FC<HistoryDrawerProps> = ({
   quotes,
   onDeleteQuote,
   onSelectQuote,
+  onStatusChange,
 }) => {
   return (
     <>
@@ -75,14 +78,28 @@ export const HistoryDrawer: FC<HistoryDrawerProps> = ({
                   <Trash2 className="w-4 h-4" />
                 </button>
 
-                <div className="space-y-1 pr-6" onClick={() => onSelectQuote(q)}>
-                  <span className="text-[9px] font-bold text-sky-600 uppercase tracking-widest block">
-                    {q.data}
-                  </span>
-                  <h4 className="font-black text-slate-800 text-sm uppercase leading-tight cursor-pointer hover:text-sky-600 transition-colors">
-                    {q.cliente}
-                  </h4>
-                </div>
+                {(() => {
+                  const quoteCat = CATEGORIES.find(c => c.id === q.category) || CATEGORIES[0];
+                  return (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                          <Folder className="w-2.5 h-2.5 text-slate-500" />
+                          {quoteCat.title}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-1 pr-6" onClick={() => onSelectQuote(q)}>
+                        <span className="text-[9px] font-bold text-sky-600 uppercase tracking-widest block">
+                          {q.data}
+                        </span>
+                        <h4 className="font-black text-slate-800 text-sm uppercase leading-tight cursor-pointer hover:text-sky-600 transition-colors">
+                          {q.cliente}
+                        </h4>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 font-semibold border-t border-slate-50 pt-2">
                   <span className="flex items-center gap-1">
@@ -104,6 +121,26 @@ export const HistoryDrawer: FC<HistoryDrawerProps> = ({
                       </span>
                     </div>
                   ))}
+                </div>
+
+                {/* Interactive Status Selector */}
+                <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 mt-2">
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">STATUS</span>
+                  <select
+                    value={q.status || "aprovado"}
+                    onChange={(e) => onStatusChange?.(q.id, e.target.value as any)}
+                    className={`text-[9px] font-extrabold uppercase tracking-wider rounded-lg px-2 py-1 focus:outline-none border cursor-pointer transition-all ${
+                      (q.status || "aprovado") === "aprovado"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : (q.status || "aprovado") === "pendente"
+                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                        : "bg-rose-50 text-rose-700 border-rose-200"
+                    }`}
+                  >
+                    <option value="aprovado">Aprovado</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="cancelado">Cancelado</option>
+                  </select>
                 </div>
               </div>
             ))

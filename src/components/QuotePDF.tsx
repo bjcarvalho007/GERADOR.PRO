@@ -1,5 +1,6 @@
 import { type FC } from "react";
 import { QuoteItem } from "../types";
+import { CATEGORIES } from "../data/categories";
 
 interface QuotePDFProps {
   businessName: string;
@@ -12,6 +13,7 @@ interface QuotePDFProps {
   items: QuoteItem[];
   total: string;
   isPremium: boolean;
+  category?: string;
 }
 
 export const QuotePDF: FC<QuotePDFProps> = ({
@@ -25,11 +27,14 @@ export const QuotePDF: FC<QuotePDFProps> = ({
   items,
   total,
   isPremium,
+  category = "climatizacao",
 }) => {
   const currentDate = new Date().toLocaleString("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
   });
+
+  const cat = CATEGORIES.find((c) => c.id === category) || CATEGORIES[0];
 
   return (
     <div
@@ -91,7 +96,7 @@ export const QuotePDF: FC<QuotePDFProps> = ({
               fontWeight: 700,
             }}
           >
-            Especialista em Climatização & Refrigeração
+            {cat.subtitle}
           </p>
         </div>
         <div style={{ textAlign: "right", width: "35%" }}>
@@ -198,7 +203,7 @@ export const QuotePDF: FC<QuotePDFProps> = ({
                 letterSpacing: "1px",
               }}
             >
-              EQUIPAMENTO / CAPACIDADE
+              {(cat.modelLabel + " / " + cat.powerLabel).toUpperCase()}
             </th>
             <th
               style={{

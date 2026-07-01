@@ -16,6 +16,8 @@ export interface Quote {
   data: string;
   items: QuoteItem[];
   total: string;
+  category?: string;
+  status?: "aprovado" | "pendente" | "cancelado";
 }
 
 export interface ProfessionalInfo {
