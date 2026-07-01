@@ -104,6 +104,11 @@ export default function App() {
   const [clientDoc, setClientDoc] = useState("");
   const [clientAddress, setClientAddress] = useState("");
 
+  // --- Warranty Configuration ---
+  const [warranty, setWarranty] = useState(() => {
+    return localStorage.getItem("bjc_default_warranty") || "90 dias";
+  });
+
   // --- Quote Items ---
   const [items, setItems] = useState<QuoteItem[]>([]);
 
@@ -217,6 +222,11 @@ export default function App() {
     localStorage.setItem("bjc_business_cnpj", profInfo.cnpj);
   }, [profInfo]);
 
+  // --- Syncing Warranty to Storage ---
+  useEffect(() => {
+    localStorage.setItem("bjc_default_warranty", warranty);
+  }, [warranty]);
+
   // --- Show Toast Helper ---
   const triggerToast = (msg: string, type: "success" | "error" = "error") => {
     setToast({
@@ -270,6 +280,9 @@ export default function App() {
           setClientDoc(draft.clientDoc || "");
           setClientAddress(draft.clientAddress || "");
           setItems(draft.items || []);
+          if (draft.warranty) {
+            setWarranty(draft.warranty);
+          }
         } catch (e) {
           console.error(e);
         }
@@ -287,10 +300,10 @@ export default function App() {
 
   useEffect(() => {
     if (activeCategory) {
-      const draft = { clientName, clientPhone, clientPhoneAlt, clientDoc, clientAddress, items };
+      const draft = { clientName, clientPhone, clientPhoneAlt, clientDoc, clientAddress, items, warranty };
       localStorage.setItem(`bjc_draft_${activeCategory.id}`, JSON.stringify(draft));
     }
-  }, [clientName, clientPhone, clientPhoneAlt, clientDoc, clientAddress, items, activeCategory]);
+  }, [clientName, clientPhone, clientPhoneAlt, clientDoc, clientAddress, items, warranty, activeCategory]);
 
   // --- Status Change directly from HistoryDrawer ---
   const handleStatusChange = (id: number, status: "aprovado" | "pendente" | "cancelado") => {
@@ -506,7 +519,8 @@ export default function App() {
       items: [...items],
       total: formattedTotal,
       category: activeCategory?.id || "climatizacao",
-      status: "aprovado"
+      status: "aprovado",
+      warranty: warranty
     };
 
     // Append to locally saved list
@@ -573,6 +587,9 @@ export default function App() {
     setClientDoc(quote.clientDoc || "");
     setClientAddress(quote.clientAddress || "");
     setItems(quote.items);
+    if (quote.warranty) {
+      setWarranty(quote.warranty);
+    }
     
     // Find matching category to switch views
     const matched = CATEGORIES.find((c) => c.id === quote.category) || CATEGORIES[0];
@@ -923,6 +940,40 @@ export default function App() {
                               }`}
                             />
                           </div>
+                          <div className="mt-1">
+                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1 pl-1">
+                              Garantia do Serviço:
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="Ex: 90 dias"
+                              value={warranty}
+                              onChange={(e) => setWarranty(e.target.value)}
+                              className={`w-full px-4 py-3 border rounded-2xl text-[11px] font-bold text-center placeholder-slate-400 focus:outline-none transition-all duration-200 ${
+                                theme === "dark"
+                                  ? "bg-slate-800/50 border-slate-700 text-white focus:border-sky-500"
+                                  : "bg-slate-50/80 border-slate-200 text-slate-800 focus:border-sky-400 focus:bg-white"
+                              }`}
+                            />
+                            <div className="flex flex-wrap gap-1 mt-1.5 justify-center">
+                              {["Sem garantia", "30 dias", "90 dias", "180 dias", "1 ano"].map((opt) => (
+                                <button
+                                  key={opt}
+                                  type="button"
+                                  onClick={() => setWarranty(opt)}
+                                  className={`px-2 py-1 rounded-lg text-[9px] font-bold transition-all ${
+                                    warranty === opt
+                                      ? "bg-sky-500 text-white"
+                                      : theme === "dark"
+                                      ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                  }`}
+                                >
+                                  {opt}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -1239,6 +1290,7 @@ export default function App() {
           total={getFormattedTotal()}
           isPremium={isPremium}
           category={activeCategory?.id || "climatizacao"}
+          warranty={warranty}
         />
       </div>
 
@@ -1288,6 +1340,7 @@ export default function App() {
                   total={getFormattedTotal()}
                   isPremium={isPremium}
                   category={activeCategory?.id || "climatizacao"}
+                  warranty={warranty}
                 />
               </div>
             </div>

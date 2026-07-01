@@ -18,6 +18,7 @@ export interface Quote {
   total: string;
   category?: string;
   status?: "aprovado" | "pendente" | "cancelado";
+  warranty?: string;
 }
 
 export interface ProfessionalInfo {

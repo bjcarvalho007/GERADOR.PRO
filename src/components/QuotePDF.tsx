@@ -14,6 +14,7 @@ interface QuotePDFProps {
   total: string;
   isPremium: boolean;
   category?: string;
+  warranty?: string;
 }
 
 export const QuotePDF: FC<QuotePDFProps> = ({
@@ -28,6 +29,7 @@ export const QuotePDF: FC<QuotePDFProps> = ({
   total,
   isPremium,
   category = "climatizacao",
+  warranty = "90 dias",
 }) => {
   const currentDate = new Date().toLocaleString("pt-BR", {
     dateStyle: "short",
@@ -318,7 +320,7 @@ export const QuotePDF: FC<QuotePDFProps> = ({
         <p style={{ margin: "0 0 4px 0", fontWeight: "bold" }}>CONDIÇÕES DO ORÇAMENTO:</p>
         <ul style={{ margin: 0, paddingLeft: "15px", listStyleType: "circle" }}>
           <li>Este orçamento possui validade de 10 dias a partir da data de emissão.</li>
-          <li>Garantia dos serviços executados: 90 dias a partir da data de conclusão do serviço.</li>
+          <li>Garantia dos serviços executados: {warranty}.</li>
           <li>Os pagamentos podem ser realizados via Pix, Dinheiro ou Cartão de Crédito.</li>
         </ul>
       </div>
