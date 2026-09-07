@@ -69,9 +69,10 @@ import {
   deleteQuoteFromFirestore,
   updateQuoteStatusInFirestore,
   subscribeToQuotes,
-  saveUserProfile,
-  getUserProfile,
+  saveUserProfileAndSettings,
+  getUserProfileAndSettings,
   testFirestoreConnection,
+  initAnonymousAuth,
 } from "./lib/firebase";
 // @ts-ignore
 import html2pdf from "html2pdf.js";
@@ -237,13 +238,15 @@ export default function App() {
       console.error(e);
     }
 
-    // 5. Test Firestore Connection and Subscribe to Auth State
+    // 5. Initialize Firebase connection and silent auth
     testFirestoreConnection();
+    initAnonymousAuth();
 
     const unsubscribeAuth = subscribeToAuth((user) => {
       setCurrentUser(user);
-      if (user) {
-        getUserProfile(user.uid).then((profile) => {
+      const identifier = user?.uid || deviceId;
+      if (identifier) {
+        getUserProfileAndSettings(identifier).then((profile: any) => {
           if (profile) {
             setProfInfo((prev) => ({
               name: profile.name || prev.name,
@@ -253,21 +256,25 @@ export default function App() {
             if (profile.warranty) {
               setWarranty(profile.warranty);
             }
+            if (Array.isArray(profile.favorites) && profile.favorites.length > 0) {
+              setFavorites(profile.favorites);
+            }
           }
         });
       }
     });
 
     return () => unsubscribeAuth();
-  }, []);
+  }, [deviceId]);
 
   // --- Real-time Cloud Quotes Synchronization ---
   useEffect(() => {
-    if (!currentUser) return;
+    const identifier = currentUser?.uid || deviceId;
+    if (!identifier) return;
 
     setIsCloudSyncing(true);
     const unsubscribeQuotes = subscribeToQuotes(
-      currentUser.uid,
+      identifier,
       (cloudQuotes) => {
         setQuotes((prev) => {
           const map = new Map<number, Quote>();
@@ -277,7 +284,7 @@ export default function App() {
           prev.forEach((q) => {
             if (!map.has(q.id)) {
               map.set(q.id, q);
-              saveQuoteToFirestore(currentUser.uid, q).catch((err) => {
+              saveQuoteToFirestore(q, currentUser?.uid, deviceId).catch((err) => {
                 console.error("Erro ao subir orçamento local:", err);
               });
             }
@@ -289,26 +296,33 @@ export default function App() {
         setIsCloudSyncing(false);
       },
       (err) => {
-        console.warn("Snapshot quote sync error:", err);
+        console.warn("Snapshot quote sync warning:", err);
         setIsCloudSyncing(false);
       }
     );
 
     return () => unsubscribeQuotes();
-  }, [currentUser]);
+  }, [currentUser, deviceId]);
 
-  // --- Syncing Professional Info to Storage and Cloud ---
+  // --- Syncing Professional Info and Preferences to Storage and Cloud ---
   useEffect(() => {
     localStorage.setItem("bjc_business_name", profInfo.name);
     localStorage.setItem("bjc_business_phone", profInfo.phone);
     localStorage.setItem("bjc_business_cnpj", profInfo.cnpj);
 
-    if (currentUser) {
-      saveUserProfile(currentUser.uid, profInfo, warranty).catch((err) => {
-        console.error("Erro ao sincronizar perfil no Firestore:", err);
+    const identifier = currentUser?.uid || deviceId;
+    if (identifier) {
+      saveUserProfileAndSettings(identifier, {
+        profInfo,
+        warranty,
+        favorites,
+        isPremium,
+        deviceId,
+      }).catch((err) => {
+        console.warn("Aviso ao sincronizar perfil no Firestore:", err);
       });
     }
-  }, [profInfo, warranty, currentUser]);
+  }, [profInfo, warranty, favorites, isPremium, currentUser, deviceId]);
 
   // --- Syncing Warranty to Storage ---
   useEffect(() => {
@@ -404,11 +418,9 @@ export default function App() {
     setQuotes(updated);
     localStorage.setItem("bjc_orcamentos", JSON.stringify(updated));
 
-    if (currentUser) {
-      updateQuoteStatusInFirestore(currentUser.uid, id, status).catch((err) => {
-        console.error("Erro ao atualizar status na nuvem:", err);
-      });
-    }
+    updateQuoteStatusInFirestore(id, status, currentUser?.uid, deviceId).catch((err) => {
+      console.error("Erro ao atualizar status na nuvem:", err);
+    });
 
     triggerToast(`Status do orçamento atualizado para ${status}!`, "success");
   };
@@ -623,12 +635,10 @@ export default function App() {
     setQuotes(updatedHistory);
     localStorage.setItem("bjc_orcamentos", JSON.stringify(updatedHistory));
 
-    // Persist to Firebase Firestore if user is authenticated
-    if (currentUser) {
-      saveQuoteToFirestore(currentUser.uid, newQuote).catch((err) => {
-        console.error("Erro ao sincronizar novo orçamento com Firestore:", err);
-      });
-    }
+    // Persist to Firebase Firestore
+    saveQuoteToFirestore(newQuote, currentUser?.uid, deviceId).catch((err) => {
+      console.error("Erro ao sincronizar novo orçamento com Firestore:", err);
+    });
 
     // Increase globally tracked uses counter
     const nextCounter = usageCounter + 1;
@@ -640,12 +650,7 @@ export default function App() {
       localStorage.removeItem(`bjc_draft_${activeCategory.id}`);
     }
 
-    triggerToast(
-      currentUser
-        ? "Orçamento gerado e sincronizado na Nuvem (Firebase)!"
-        : "Orçamento gerado e salvo com sucesso!",
-      "success"
-    );
+    triggerToast("Orçamento gerado e salvo no banco de dados!", "success");
 
     // Optional WhatsApp share link launch
     if (sendToWhatsapp) {
@@ -681,11 +686,9 @@ export default function App() {
       setQuotes(restQuotes);
       localStorage.setItem("bjc_orcamentos", JSON.stringify(restQuotes));
 
-      if (currentUser) {
-        deleteQuoteFromFirestore(currentUser.uid, deleteCandidateId).catch((err) => {
-          console.error("Erro ao excluir do Firestore:", err);
-        });
-      }
+      deleteQuoteFromFirestore(deleteCandidateId, currentUser?.uid, deviceId).catch((err) => {
+        console.error("Erro ao excluir do Firestore:", err);
+      });
 
       triggerToast("Orçamento excluído do histórico com sucesso.", "success");
     }
@@ -754,7 +757,7 @@ export default function App() {
                 </div>
                 <div>
                   <span className="text-[10px] font-black tracking-wider text-slate-400 uppercase block leading-none mb-1">
-                    GERADORPRO MULTISSERVIÇOS
+                    GERADOR PRO - MULTISSERVIÇOS
                   </span>
                   {isPremium ? (
                     <span className="inline-flex items-center gap-1 text-[9px] bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-2.5 py-0.5 rounded-full font-black uppercase shadow-xs">
@@ -800,11 +803,15 @@ export default function App() {
                       ? "border-slate-800 hover:border-slate-700 hover:bg-slate-800 text-slate-300"
                       : "border-slate-200 hover:border-sky-100 hover:bg-sky-50/50 text-slate-500 hover:text-sky-600"
                   }`}
+                  title={currentUser && !currentUser.isAnonymous ? "Ver Histórico" : "Histórico (Requer criação de conta)"}
                 >
                   <span className="text-[10px] font-bold uppercase block tracking-wider hidden sm:block">
                     Histórico
                   </span>
                   <History className="w-4 h-4" />
+                  {(!currentUser || currentUser.isAnonymous) && (
+                    <Lock className="w-3 h-3 text-amber-500" />
+                  )}
                 </button>
               </div>
             </div>
@@ -837,7 +844,7 @@ export default function App() {
               <div className="relative pt-12 pb-14 px-6 text-white text-center overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border-b border-indigo-950">
                 <div className="max-w-4xl mx-auto relative z-10 space-y-4">
                   <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-none uppercase">
-                    PLATA-FORMA <span className="bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">MULTISSERVIÇOS</span>
+                    GERADOR PRO - <span className="bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">MULTISSERVIÇOS</span>
                   </h1>
                   <p className="max-w-xl mx-auto text-xs md:text-sm font-semibold uppercase tracking-wider text-slate-300 leading-relaxed">
                     Selecione seu segmento profissional ou pesquise o serviço para gerar orçamentos instantâneos de alto padrão.
@@ -1546,8 +1553,9 @@ export default function App() {
         onDeleteQuote={handleTriggerDelete}
         onSelectQuote={handleSelectQuoteAsWorkspace}
         onStatusChange={handleStatusChange}
-        isCloudConnected={!!currentUser}
+        isCloudConnected={!!(currentUser && !currentUser.isAnonymous)}
         userEmail={currentUser?.email || undefined}
+        isUserRegistered={!!(currentUser && !currentUser.isAnonymous)}
         onOpenAuth={() => {
           setIsHistoryOpen(false);
           setIsAuthModalOpen(true);

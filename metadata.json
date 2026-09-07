@@ -1,6 +1,6 @@
 {
-  "name": "GERADORPRO",
-  "description": "Sistema Profissional de Orçamentos para Climatização",
+  "name": "GERADOR PRO - MULTISSERVIÇOS",
+  "description": "Sistema Profissional de Orçamentos Multisserviços",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

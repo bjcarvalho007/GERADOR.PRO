@@ -4,6 +4,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInAnonymously,
   signOut,
   sendPasswordResetEmail,
   type User,
@@ -34,7 +35,19 @@ export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// Authentication helper listeners & functions
+// Inicia autenticação anônima automaticamente caso o usuário não tenha feito login
+export const initAnonymousAuth = async () => {
+  try {
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+    }
+  } catch (e) {
+    // Se o login anônimo não estiver ativo no console do Firebase, continua normalmente
+    console.warn("Autenticação anônima indisponível ou desativada no Firebase:", e);
+  }
+};
+
+// Listeners e funções de Autenticação
 export const subscribeToAuth = (callback: (user: User | null) => void) => {
   return onAuthStateChanged(auth, callback);
 };
@@ -55,13 +68,101 @@ export const resetPassword = async (email: string) => {
   return sendPasswordResetEmail(auth, email);
 };
 
-// Real-time Firestore sync operations
+// Salva o orçamento no Firestore em múltiplos pontos seguros
+export const saveQuoteToFirestore = async (
+  quote: Quote,
+  userId?: string | null,
+  deviceId?: string
+) => {
+  const timestamp = new Date().toISOString();
+  const payload = {
+    ...quote,
+    userId: userId || "",
+    deviceId: deviceId || "",
+    updatedAt: timestamp,
+  };
+
+  // 1. Salva na coleção global de orçamentos (garante persistência independente de login)
+  try {
+    const globalDoc = doc(db, "quotes", String(quote.id));
+    await setDoc(globalDoc, payload, { merge: true });
+  } catch (err) {
+    console.warn("Aviso ao salvar na coleção global de orçamentos:", err);
+  }
+
+  // 2. Se houver usuário ou dispositivo identificado, salva também na coleção do usuário
+  const ownerId = userId || deviceId;
+  if (ownerId) {
+    try {
+      const userQuoteDoc = doc(db, "users", ownerId, "quotes", String(quote.id));
+      await setDoc(userQuoteDoc, payload, { merge: true });
+    } catch (err) {
+      console.warn("Aviso ao salvar orçamento no perfil:", err);
+    }
+  }
+};
+
+// Exclui o orçamento do Firestore
+export const deleteQuoteFromFirestore = async (
+  quoteId: number,
+  userId?: string | null,
+  deviceId?: string
+) => {
+  try {
+    const globalDoc = doc(db, "quotes", String(quoteId));
+    await deleteDoc(globalDoc);
+  } catch (err) {
+    console.warn("Aviso ao excluir orçamento global:", err);
+  }
+
+  const ownerId = userId || deviceId;
+  if (ownerId) {
+    try {
+      const userQuoteDoc = doc(db, "users", ownerId, "quotes", String(quoteId));
+      await deleteDoc(userQuoteDoc);
+    } catch (err) {
+      console.warn("Aviso ao excluir orçamento do perfil:", err);
+    }
+  }
+};
+
+// Atualiza o status do orçamento no Firestore
+export const updateQuoteStatusInFirestore = async (
+  quoteId: number,
+  status: "aprovado" | "pendente" | "cancelado",
+  userId?: string | null,
+  deviceId?: string
+) => {
+  const updatePayload = {
+    status,
+    updatedAt: new Date().toISOString(),
+  };
+
+  try {
+    const globalDoc = doc(db, "quotes", String(quoteId));
+    await updateDoc(globalDoc, updatePayload);
+  } catch (err) {
+    console.warn("Aviso ao atualizar status global:", err);
+  }
+
+  const ownerId = userId || deviceId;
+  if (ownerId) {
+    try {
+      const userQuoteDoc = doc(db, "users", ownerId, "quotes", String(quoteId));
+      await updateDoc(userQuoteDoc, updatePayload);
+    } catch (err) {
+      console.warn("Aviso ao atualizar status no perfil:", err);
+    }
+  }
+};
+
+// Sincronização em tempo real dos orçamentos
 export const subscribeToQuotes = (
-  userId: string,
+  identifier: string,
   onUpdate: (quotes: Quote[]) => void,
   onError?: (err: any) => void
 ) => {
-  const quotesRef = collection(db, "users", userId, "quotes");
+  const quotesRef = collection(db, "users", identifier, "quotes");
   return onSnapshot(
     quotesRef,
     (snapshot) => {
@@ -69,7 +170,6 @@ export const subscribeToQuotes = (
       snapshot.forEach((docSnap) => {
         quotes.push(docSnap.data() as Quote);
       });
-      // Sort newest first
       quotes.sort((a, b) => b.id - a.id);
       onUpdate(quotes);
     },
@@ -79,56 +179,49 @@ export const subscribeToQuotes = (
   );
 };
 
-export const saveQuoteToFirestore = async (userId: string, quote: Quote) => {
-  const quoteDocRef = doc(db, "users", userId, "quotes", String(quote.id));
-  await setDoc(quoteDocRef, {
-    ...quote,
-    userId,
-    updatedAt: new Date().toISOString(),
-  });
-};
-
-export const deleteQuoteFromFirestore = async (userId: string, quoteId: number) => {
-  const quoteDocRef = doc(db, "users", userId, "quotes", String(quoteId));
-  await deleteDoc(quoteDocRef);
-};
-
-export const updateQuoteStatusInFirestore = async (
-  userId: string,
-  quoteId: number,
-  status: "aprovado" | "pendente" | "cancelado"
+// Salva todos os dados do perfil profissional e preferências no Firestore
+export const saveUserProfileAndSettings = async (
+  identifier: string,
+  data: {
+    profInfo?: ProfessionalInfo;
+    warranty?: string;
+    favorites?: string[];
+    isPremium?: boolean;
+    deviceId?: string;
+  }
 ) => {
-  const quoteDocRef = doc(db, "users", userId, "quotes", String(quoteId));
-  await updateDoc(quoteDocRef, { status });
-};
-
-export const saveUserProfile = async (
-  userId: string,
-  profInfo: ProfessionalInfo,
-  warranty?: string
-) => {
-  const userDocRef = doc(db, "users", userId);
-  await setDoc(
-    userDocRef,
-    {
-      ...profInfo,
-      warranty: warranty || "",
-      updatedAt: new Date().toISOString(),
-    },
-    { merge: true }
-  );
-};
-
-export const getUserProfile = async (userId: string) => {
+  if (!identifier) return;
   try {
-    const userDocRef = doc(db, "users", userId);
+    const userDocRef = doc(db, "users", identifier);
+    await setDoc(
+      userDocRef,
+      {
+        ...data.profInfo,
+        warranty: data.warranty || "",
+        favorites: data.favorites || [],
+        isPremium: !!data.isPremium,
+        deviceId: data.deviceId || "",
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+  } catch (err) {
+    console.warn("Aviso ao salvar perfil no Firestore:", err);
+  }
+};
+
+// Carrega os dados do perfil e configurações do Firestore
+export const getUserProfileAndSettings = async (identifier: string) => {
+  if (!identifier) return null;
+  try {
+    const userDocRef = doc(db, "users", identifier);
     const snap = await getDoc(userDocRef);
     if (snap.exists()) {
-      return snap.data() as Partial<ProfessionalInfo> & { warranty?: string };
+      return snap.data();
     }
     return null;
   } catch (e) {
-    console.warn("Erro ao carregar perfil do Firestore:", e);
+    console.warn("Aviso ao carregar dados do usuário do Firestore:", e);
     return null;
   }
 };
@@ -139,7 +232,7 @@ export const testFirestoreConnection = async () => {
     await getDoc(testDoc);
     return true;
   } catch (e) {
-    console.warn("Firestore connection check:", e);
+    console.warn("Verificação de conexão Firestore:", e);
     return false;
   }
 };

@@ -1,34 +1,30 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Default-deny all requests
-    match /{document=**} {
-      allow read, write: if false;
-    }
 
+    // Função auxiliar de autenticação
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+    // Coleção principal de Orçamentos
+    match /quotes/{quoteId} {
+      allow read, write: if true;
     }
 
-    // Public test document for connectivity diagnostics
-    match /test/connection {
-      allow read: if true;
-    }
-
-    // User profile document
+    // Coleção de Perfis Profissionais e Configurações
     match /users/{userId} {
-      allow read: if isOwner(userId);
-      allow create, update: if isOwner(userId);
-      allow delete: if false;
+      allow read, write: if true;
 
-      // Professional quotes subcollection
+      // Subcoleção de Orçamentos do Usuário
       match /quotes/{quoteId} {
-        allow read, list, create, update, delete: if isOwner(userId);
+        allow read, write: if true;
       }
+    }
+
+    // Coleção de Teste de Conexão
+    match /test/{docId} {
+      allow read, write: if true;
     }
   }
 }

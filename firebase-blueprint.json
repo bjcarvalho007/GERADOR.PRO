@@ -2,7 +2,7 @@
   "entities": {
     "UserProfile": {
       "title": "UserProfile",
-      "description": "Dados do perfil profissional do usuário",
+      "description": "Dados do perfil profissional e configurações do usuário",
       "type": "object",
       "properties": {
         "uid": { "type": "string" },
@@ -11,42 +11,50 @@
         "phone": { "type": "string" },
         "cnpj": { "type": "string" },
         "warranty": { "type": "string" },
+        "favorites": { "type": "array", "items": { "type": "string" } },
+        "isPremium": { "type": "boolean" },
+        "deviceId": { "type": "string" },
         "updatedAt": { "type": "string" }
       },
-      "required": ["uid", "email"]
+      "required": ["updatedAt"]
     },
     "Quote": {
       "title": "Quote",
-      "description": "Orçamento de climatização emitido pelo profissional",
+      "description": "Orçamento profissional de serviços",
       "type": "object",
       "properties": {
         "id": { "type": "number" },
-        "clientName": { "type": "string" },
-        "clientPhone": { "type": "string" },
+        "cliente": { "type": "string" },
+        "telefone": { "type": "string" },
+        "contatoAlt": { "type": "string" },
+        "clientDoc": { "type": "string" },
         "clientAddress": { "type": "string" },
-        "date": { "type": "string" },
-        "validUntil": { "type": "string" },
-        "paymentMethod": { "type": "string" },
-        "discount": { "type": "number" },
-        "notes": { "type": "string" },
+        "data": { "type": "string" },
+        "items": { "type": "array" },
+        "total": { "type": "string" },
+        "category": { "type": "string" },
         "status": { "type": "string", "enum": ["aprovado", "pendente", "cancelado"] },
-        "categoryTitle": { "type": "string" },
-        "categoryIcon": { "type": "string" },
-        "total": { "type": "number" },
+        "warranty": { "type": "string" },
+        "deviceId": { "type": "string" },
         "userId": { "type": "string" },
+        "updatedAt": { "type": "string" },
         "createdAt": { "type": "string" }
       },
-      "required": ["id", "clientName", "items", "total"]
+      "required": ["id", "cliente", "items", "total"]
     }
   },
   "firestore": {
+    "/quotes/{quoteId}": {
+      "schema": "Quote",
+      "description": "Coleção central de todos os orçamentos emitidos"
+    },
     "/users/{userId}": {
       "schema": "UserProfile",
-      "description": "Documento de dados do perfil profissional do usuário autenticado"
+      "description": "Dados do perfil profissional, empresa e preferências"
     },
     "/users/{userId}/quotes/{quoteId}": {
       "schema": "Quote",
-      "description": "Coleção de orçamentos criados pelo usuário profissional"
+      "description": "Coleção de orçamentos vinculados ao usuário autenticado"
     }
   }
 }
