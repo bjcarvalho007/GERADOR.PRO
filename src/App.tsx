@@ -47,14 +47,32 @@ import {
   FolderOpen,
   Save,
   LayoutGrid,
-  Layers
+  Layers,
+  LogIn,
+  LogOut,
+  Cloud,
+  ShieldCheck,
+  Database,
+  UserCheck
 } from "lucide-react";
 import { Toast } from "./components/Toast";
 import { PremiumModal } from "./components/PremiumModal";
 import { HistoryDrawer } from "./components/HistoryDrawer";
 import { QuotePDF } from "./components/QuotePDF";
+import { AuthModal } from "./components/AuthModal";
 import { CATEGORIES, Category } from "./data/categories";
 import { Quote, QuoteItem, ProfessionalInfo } from "./types";
+import { type User } from "firebase/auth";
+import {
+  subscribeToAuth,
+  saveQuoteToFirestore,
+  deleteQuoteFromFirestore,
+  updateQuoteStatusInFirestore,
+  subscribeToQuotes,
+  saveUserProfile,
+  getUserProfile,
+  testFirestoreConnection,
+} from "./lib/firebase";
 // @ts-ignore
 import html2pdf from "html2pdf.js";
 
@@ -125,6 +143,11 @@ export default function App() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [deleteCandidateId, setDeleteCandidateId] = useState<number | null>(null);
+
+  // --- Firebase Cloud & Authentication State ---
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
 
   // --- Multi-Service State ---
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
@@ -213,14 +236,79 @@ export default function App() {
     } catch (e) {
       console.error(e);
     }
+
+    // 5. Test Firestore Connection and Subscribe to Auth State
+    testFirestoreConnection();
+
+    const unsubscribeAuth = subscribeToAuth((user) => {
+      setCurrentUser(user);
+      if (user) {
+        getUserProfile(user.uid).then((profile) => {
+          if (profile) {
+            setProfInfo((prev) => ({
+              name: profile.name || prev.name,
+              phone: profile.phone || prev.phone,
+              cnpj: profile.cnpj || prev.cnpj,
+            }));
+            if (profile.warranty) {
+              setWarranty(profile.warranty);
+            }
+          }
+        });
+      }
+    });
+
+    return () => unsubscribeAuth();
   }, []);
 
-  // --- Syncing Professional Info to Storage ---
+  // --- Real-time Cloud Quotes Synchronization ---
+  useEffect(() => {
+    if (!currentUser) return;
+
+    setIsCloudSyncing(true);
+    const unsubscribeQuotes = subscribeToQuotes(
+      currentUser.uid,
+      (cloudQuotes) => {
+        setQuotes((prev) => {
+          const map = new Map<number, Quote>();
+          // Cloud quotes are authoritative
+          cloudQuotes.forEach((q) => map.set(q.id, q));
+          // If local has quotes that aren't on cloud yet, upload them
+          prev.forEach((q) => {
+            if (!map.has(q.id)) {
+              map.set(q.id, q);
+              saveQuoteToFirestore(currentUser.uid, q).catch((err) => {
+                console.error("Erro ao subir orçamento local:", err);
+              });
+            }
+          });
+          const merged = Array.from(map.values()).sort((a, b) => b.id - a.id);
+          localStorage.setItem("bjc_orcamentos", JSON.stringify(merged));
+          return merged;
+        });
+        setIsCloudSyncing(false);
+      },
+      (err) => {
+        console.warn("Snapshot quote sync error:", err);
+        setIsCloudSyncing(false);
+      }
+    );
+
+    return () => unsubscribeQuotes();
+  }, [currentUser]);
+
+  // --- Syncing Professional Info to Storage and Cloud ---
   useEffect(() => {
     localStorage.setItem("bjc_business_name", profInfo.name);
     localStorage.setItem("bjc_business_phone", profInfo.phone);
     localStorage.setItem("bjc_business_cnpj", profInfo.cnpj);
-  }, [profInfo]);
+
+    if (currentUser) {
+      saveUserProfile(currentUser.uid, profInfo, warranty).catch((err) => {
+        console.error("Erro ao sincronizar perfil no Firestore:", err);
+      });
+    }
+  }, [profInfo, warranty, currentUser]);
 
   // --- Syncing Warranty to Storage ---
   useEffect(() => {
@@ -315,6 +403,13 @@ export default function App() {
     });
     setQuotes(updated);
     localStorage.setItem("bjc_orcamentos", JSON.stringify(updated));
+
+    if (currentUser) {
+      updateQuoteStatusInFirestore(currentUser.uid, id, status).catch((err) => {
+        console.error("Erro ao atualizar status na nuvem:", err);
+      });
+    }
+
     triggerToast(`Status do orçamento atualizado para ${status}!`, "success");
   };
 
@@ -528,6 +623,13 @@ export default function App() {
     setQuotes(updatedHistory);
     localStorage.setItem("bjc_orcamentos", JSON.stringify(updatedHistory));
 
+    // Persist to Firebase Firestore if user is authenticated
+    if (currentUser) {
+      saveQuoteToFirestore(currentUser.uid, newQuote).catch((err) => {
+        console.error("Erro ao sincronizar novo orçamento com Firestore:", err);
+      });
+    }
+
     // Increase globally tracked uses counter
     const nextCounter = usageCounter + 1;
     setUsageCounter(nextCounter);
@@ -538,7 +640,12 @@ export default function App() {
       localStorage.removeItem(`bjc_draft_${activeCategory.id}`);
     }
 
-    triggerToast("Orçamento gerado e salvo com sucesso!", "success");
+    triggerToast(
+      currentUser
+        ? "Orçamento gerado e sincronizado na Nuvem (Firebase)!"
+        : "Orçamento gerado e salvo com sucesso!",
+      "success"
+    );
 
     // Optional WhatsApp share link launch
     if (sendToWhatsapp) {
@@ -573,6 +680,13 @@ export default function App() {
       const restQuotes = quotes.filter((q) => q.id !== deleteCandidateId);
       setQuotes(restQuotes);
       localStorage.setItem("bjc_orcamentos", JSON.stringify(restQuotes));
+
+      if (currentUser) {
+        deleteQuoteFromFirestore(currentUser.uid, deleteCandidateId).catch((err) => {
+          console.error("Erro ao excluir do Firestore:", err);
+        });
+      }
+
       triggerToast("Orçamento excluído do histórico com sucesso.", "success");
     }
     setIsDeleteConfirmOpen(false);
@@ -655,6 +769,30 @@ export default function App() {
               </div>
               
               <div className="flex items-center gap-2">
+                {/* Firebase Account & Cloud Sync Button */}
+                {currentUser ? (
+                  <button
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="px-2.5 py-1.5 sm:px-3 sm:py-2 border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl transition-all flex items-center gap-1.5 active:scale-95 text-[10px] font-bold"
+                    title={`Conectado: ${currentUser.email}`}
+                  >
+                    <Cloud className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span className="hidden sm:inline max-w-[110px] truncate">
+                      {currentUser.email?.split("@")[0]}
+                    </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="px-2.5 py-1.5 sm:px-3 sm:py-2 border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 rounded-xl transition-all flex items-center gap-1.5 active:scale-95 text-[10px] font-bold uppercase tracking-wider"
+                    title="Entrar com E-mail e Senha no Firebase"
+                  >
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Entrar</span>
+                  </button>
+                )}
+
                 <button
                   onClick={() => setIsHistoryOpen(true)}
                   className={`p-2 border rounded-xl transition-all flex items-center gap-1.5 active:scale-90 font-sans ${
@@ -731,6 +869,44 @@ export default function App() {
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.15)_0%,rgba(0,0,0,0)_85%)] pointer-events-none" />
               </div>
 
+              {/* FIREBASE SÃO PAULO CLOUD STATUS BAR */}
+              <div className="max-w-4xl mx-auto w-full px-4">
+                <div
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="cursor-pointer bg-slate-900/60 hover:bg-slate-900/80 border border-slate-800 hover:border-slate-700 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 transition-all shadow-sm group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 group-hover:scale-105 transition-transform shrink-0">
+                      <Database className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[11px] font-black uppercase text-white tracking-wide">
+                          Banco Firebase Firestore
+                        </span>
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                          São Paulo (SP)
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                        {currentUser ? (
+                          <>Conectado como <strong className="text-slate-200">{currentUser.email}</strong> • Sincronização em tempo real ativa</>
+                        ) : (
+                          <>Seus orçamentos estão salvos localmente. <strong className="text-sky-400 underline">Clique para entrar ou criar conta</strong></>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-[10px] font-bold shrink-0">
+                    <span className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      100% Seguro
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* SECTION: FAVORITES */}
               {favorites.length > 0 && searchQuery === "" && (
                 <div className="max-w-4xl mx-auto w-full px-4 space-y-3">
@@ -757,8 +933,8 @@ export default function App() {
                             <IconComponent name={cat.iconName} className="w-4 h-4" />
                           </div>
                           <div>
-                            <h4 className="font-black text-[13px] uppercase tracking-tight">{cat.title}</h4>
-                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest block mt-0.5">
+                            <h4 className="font-black text-[13px] uppercase tracking-tight text-white">{cat.title}</h4>
+                            <span className="text-[8px] font-bold text-slate-300 uppercase tracking-widest block mt-0.5">
                               {count} {count === 1 ? "orçamento" : "orçamentos"}
                             </span>
                           </div>
@@ -819,13 +995,13 @@ export default function App() {
                             <IconComponent name={cat.iconName} className="w-5 h-5" />
                           </div>
                           <div className="flex-grow pr-6">
-                            <h4 className="font-black text-[14px] uppercase tracking-tight text-slate-800 dark:text-slate-100 leading-tight">
+                            <h4 className="font-black text-[14px] uppercase tracking-tight text-white leading-tight">
                               {cat.title}
                             </h4>
-                            <p className="text-[10px] text-slate-400 font-semibold leading-tight mt-0.5 truncate max-w-[180px]">
+                            <p className="text-[10px] text-slate-300 font-semibold leading-tight mt-0.5 truncate max-w-[180px]">
                               {cat.subtitle}
                             </p>
-                            <span className="inline-flex items-center gap-1 text-[8px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-2 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-md">
+                            <span className="inline-flex items-center gap-1 text-[8px] font-bold uppercase tracking-widest text-slate-300 mt-2 bg-slate-800/90 border border-slate-700/50 px-2 py-0.5 rounded-md">
                               {count} orc.
                             </span>
                           </div>
@@ -1408,6 +1584,12 @@ export default function App() {
         onDeleteQuote={handleTriggerDelete}
         onSelectQuote={handleSelectQuoteAsWorkspace}
         onStatusChange={handleStatusChange}
+        isCloudConnected={!!currentUser}
+        userEmail={currentUser?.email || undefined}
+        onOpenAuth={() => {
+          setIsHistoryOpen(false);
+          setIsAuthModalOpen(true);
+        }}
       />
 
       <PremiumModal
@@ -1416,6 +1598,14 @@ export default function App() {
         deviceId={deviceId}
         isBlockedByLimit={isBlockedByLimit}
         onActivate={handleActivation}
+      />
+
+      {/* --- FIREBASE AUTH MODAL (LOGIN / CADASTRO / RECUPERAÇÃO) --- */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        currentUser={currentUser}
+        onSuccess={(msg) => triggerToast(msg, "success")}
       />
 
       {/* --- SYSTEM TOAST FEEDBACK --- */}

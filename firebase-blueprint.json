@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Dados do perfil profissional do usuário",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "cnpj": { "type": "string" },
+        "warranty": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Quote": {
+      "title": "Quote",
+      "description": "Orçamento de climatização emitido pelo profissional",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number" },
+        "clientName": { "type": "string" },
+        "clientPhone": { "type": "string" },
+        "clientAddress": { "type": "string" },
+        "date": { "type": "string" },
+        "validUntil": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "discount": { "type": "number" },
+        "notes": { "type": "string" },
+        "status": { "type": "string", "enum": ["aprovado", "pendente", "cancelado"] },
+        "categoryTitle": { "type": "string" },
+        "categoryIcon": { "type": "string" },
+        "total": { "type": "number" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "clientName", "items", "total"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Documento de dados do perfil profissional do usuário autenticado"
+    },
+    "/users/{userId}/quotes/{quoteId}": {
+      "schema": "Quote",
+      "description": "Coleção de orçamentos criados pelo usuário profissional"
+    }
+  }
+}

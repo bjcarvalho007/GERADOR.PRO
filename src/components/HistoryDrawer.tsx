@@ -1,5 +1,5 @@
 import { type FC } from "react";
-import { X, Trash2, Calendar, Phone, DollarSign, Folder } from "lucide-react";
+import { X, Trash2, Calendar, Phone, DollarSign, Folder, Cloud, CloudCheck } from "lucide-react";
 import { Quote } from "../types";
 import { CATEGORIES } from "../data/categories";
 
@@ -10,6 +10,9 @@ interface HistoryDrawerProps {
   onDeleteQuote: (id: number) => void;
   onSelectQuote: (quote: Quote) => void;
   onStatusChange?: (id: number, status: "aprovado" | "pendente" | "cancelado") => void;
+  isCloudConnected?: boolean;
+  userEmail?: string;
+  onOpenAuth?: () => void;
 }
 
 export const HistoryDrawer: FC<HistoryDrawerProps> = ({
@@ -19,6 +22,9 @@ export const HistoryDrawer: FC<HistoryDrawerProps> = ({
   onDeleteQuote,
   onSelectQuote,
   onStatusChange,
+  isCloudConnected,
+  userEmail,
+  onOpenAuth,
 }) => {
   return (
     <>
@@ -41,9 +47,21 @@ export const HistoryDrawer: FC<HistoryDrawerProps> = ({
             <h2 className="font-black text-slate-800 uppercase text-sm tracking-tight">
               Histórico de Orçamentos
             </h2>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-              Salvos neste aparelho
-            </p>
+            {isCloudConnected ? (
+              <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5">
+                <Cloud className="w-3 h-3 text-emerald-600" />
+                Sincronizado na Nuvem Firebase (SP)
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={onOpenAuth}
+                className="text-[10px] text-sky-600 hover:text-sky-700 font-bold uppercase tracking-wider flex items-center gap-1 mt-0.5 text-left transition-colors"
+              >
+                <Cloud className="w-3 h-3" />
+                Conectar ao Firebase
+              </button>
+            )}
           </div>
           <button
             onClick={onClose}
