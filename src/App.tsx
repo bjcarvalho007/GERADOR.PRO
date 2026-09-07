@@ -869,44 +869,6 @@ export default function App() {
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.15)_0%,rgba(0,0,0,0)_85%)] pointer-events-none" />
               </div>
 
-              {/* FIREBASE SÃO PAULO CLOUD STATUS BAR */}
-              <div className="max-w-4xl mx-auto w-full px-4">
-                <div
-                  onClick={() => setIsAuthModalOpen(true)}
-                  className="cursor-pointer bg-slate-900/60 hover:bg-slate-900/80 border border-slate-800 hover:border-slate-700 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 transition-all shadow-sm group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 group-hover:scale-105 transition-transform shrink-0">
-                      <Database className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[11px] font-black uppercase text-white tracking-wide">
-                          Banco Firebase Firestore
-                        </span>
-                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                          São Paulo (SP)
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-slate-400 font-medium mt-0.5">
-                        {currentUser ? (
-                          <>Conectado como <strong className="text-slate-200">{currentUser.email}</strong> • Sincronização em tempo real ativa</>
-                        ) : (
-                          <>Seus orçamentos estão salvos localmente. <strong className="text-sky-400 underline">Clique para entrar ou criar conta</strong></>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-[10px] font-bold shrink-0">
-                    <span className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      100% Seguro
-                    </span>
-                  </div>
-                </div>
-              </div>
-
               {/* SECTION: FAVORITES */}
               {favorites.length > 0 && searchQuery === "" && (
                 <div className="max-w-4xl mx-auto w-full px-4 space-y-3">
