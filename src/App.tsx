@@ -803,15 +803,11 @@ export default function App() {
                       ? "border-slate-800 hover:border-slate-700 hover:bg-slate-800 text-slate-300"
                       : "border-slate-200 hover:border-sky-100 hover:bg-sky-50/50 text-slate-500 hover:text-sky-600"
                   }`}
-                  title={currentUser && !currentUser.isAnonymous ? "Ver Histórico" : "Histórico (Requer criação de conta)"}
                 >
                   <span className="text-[10px] font-bold uppercase block tracking-wider hidden sm:block">
                     Histórico
                   </span>
                   <History className="w-4 h-4" />
-                  {(!currentUser || currentUser.isAnonymous) && (
-                    <Lock className="w-3 h-3 text-amber-500" />
-                  )}
                 </button>
               </div>
             </div>
@@ -1553,9 +1549,8 @@ export default function App() {
         onDeleteQuote={handleTriggerDelete}
         onSelectQuote={handleSelectQuoteAsWorkspace}
         onStatusChange={handleStatusChange}
-        isCloudConnected={!!(currentUser && !currentUser.isAnonymous)}
+        isCloudConnected={!!currentUser}
         userEmail={currentUser?.email || undefined}
-        isUserRegistered={!!(currentUser && !currentUser.isAnonymous)}
         onOpenAuth={() => {
           setIsHistoryOpen(false);
           setIsAuthModalOpen(true);
